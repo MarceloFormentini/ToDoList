@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.marcelo.todolist.dto.UsersResponse;
 import br.com.marcelo.todolist.exception.UsersConflictException;
+import br.com.marcelo.todolist.exception.UsersEmailInvalidException;
 import br.com.marcelo.todolist.model.Users;
 import br.com.marcelo.todolist.repository.UsersRepository;
 
@@ -13,26 +14,31 @@ import br.com.marcelo.todolist.repository.UsersRepository;
 public class UsersService {
 
 	@Autowired
-	private UsersRepository userRepository;
+	private UsersRepository usersRepository;
 	
-	public UsersResponse addNewUsers(Users users) {
-		// recupera usuário pelo username
-		Users user_register = userRepository.findByUsername(users.getUsername());
+	private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+	
+	public UsersResponse addNewUser(Users newUsers) {
+		Users user_register = usersRepository.findByEmail(newUsers.getEmail());
 		if (user_register != null) {
-			throw new UsersConflictException("Username " + user_register.getUsername() + " já existe.");
+			throw new UsersConflictException("Email " + user_register.getEmail() + " já cadastrado.");
 		}
-		String bcryptHashString = BCrypt.withDefaults().hashToString(12, users.getPassword().toCharArray());
+		
+		if (isValidEmail(newUsers.getEmail()) == false) {
+			throw new UsersEmailInvalidException("Email " + newUsers.getEmail() + " é inválido");
+		}
+		String bcryptHashString = BCrypt.withDefaults().hashToString(12, newUsers.getPassword().toCharArray());
 
-		users.setPassword(bcryptHashString);
-		Users new_user = userRepository.save(users);
+		newUsers.setPassword(bcryptHashString);
+		Users new_user = usersRepository.save(newUsers);
 		
 		return new UsersResponse(
-			new_user.getUsername(),
-			new_user.getName()
+			new_user.getName(),
+			new_user.getEmail()
 		);
 	}
 	
-	public Users findByUsername(String username) {
-		return userRepository.findByUsername(username);
-	}
+	private static boolean isValidEmail(String email) {
+        return email != null && email.matches(EMAIL_REGEX);
+    }
 }
