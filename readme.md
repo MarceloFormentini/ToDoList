@@ -21,9 +21,7 @@ http://localhost:9090/task
     "description": "Fazer o cadastro de novos usuários para ter controle de entrada/saída na portaria",
     "priority":"L",
     "status": "P",
-    "user_id": {
-        "id": 1
-    }
+    "user_id": 1
 }
 ```
 
