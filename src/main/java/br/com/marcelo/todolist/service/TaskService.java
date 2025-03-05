@@ -3,11 +3,8 @@ package br.com.marcelo.todolist.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.marcelo.todolist.dto.TaskDTO;
 import br.com.marcelo.todolist.dto.TaskResponse;
-import br.com.marcelo.todolist.exception.TaskDescriptionInvalidException;
-import br.com.marcelo.todolist.exception.TaskPriorityInvalidException;
-import br.com.marcelo.todolist.exception.TaskStatusInvalidException;
-import br.com.marcelo.todolist.exception.TaskTitleInvalidException;
 import br.com.marcelo.todolist.exception.UsersNotFoundException;
 import br.com.marcelo.todolist.model.Task;
 import br.com.marcelo.todolist.model.Users;
@@ -23,37 +20,29 @@ public class TaskService {
 	@Autowired
 	private UsersRepository usersRepository;
 	
-	public TaskResponse addNewTask(Task newTask) {
-		if (newTask.getTitle() == null || newTask.getTitle().trim().isEmpty()) {
-			throw new TaskTitleInvalidException("O título não pode estar vazia");
-		}
-		
-		if (newTask.getDescription() == null || newTask.getDescription().trim().isEmpty()) {
-			throw new TaskDescriptionInvalidException("A descrição não pode estar vazia");
-		}
-		
-		if (newTask.getPriority() == null || newTask.getPriority().trim().isEmpty()) {
-			throw new TaskPriorityInvalidException("A prioridade não pode estar vazia");
-		}
-		
-		if (newTask.getStatus() == null || newTask.getStatus().trim().isEmpty()) {
-			throw new TaskStatusInvalidException("O status não pode estar vazio");
-		}
-		
-		Users user = usersRepository.findById(newTask.getUser_id().getId()).orElse(null); 
+	public TaskResponse addNewTask(TaskDTO taskDTO) {		
+		Users user = usersRepository.findById(taskDTO.getUser_id())
+				.orElseThrow(() -> new UsersNotFoundException("Código usuário " + taskDTO.getUser_id() + " não encontrado.")); 
 
 		if (user == null) {
-			throw new UsersNotFoundException("Código usuário " + newTask.getUser_id().getId() + " não encontrado.");
+			throw new UsersNotFoundException("Código usuário " + taskDTO.getUser_id() + " não encontrado.");
 		}
 		
-		newTask.setUser_id(user);
-		Task new_task = taskRepository.save(newTask);
+		Task new_task = new Task(
+			taskDTO.getTitle(),
+			taskDTO.getDescription(),
+			taskDTO.getPriority(),
+			taskDTO.getStatus(),
+			user
+		);
+		
+		Task saved_task = taskRepository.save(new_task);
 				
 		return new TaskResponse(
-			new_task.getTitle(),
-			new_task.getDescription(),
-			new_task.getPriority(),
-			new_task.getCreated_at()
+			saved_task.getTitle(),
+			saved_task.getDescription(),
+			saved_task.getPriority(),
+			saved_task.getCreated_at()
 		);				
 	}
 }

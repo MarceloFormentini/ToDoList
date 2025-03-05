@@ -40,7 +40,17 @@ public class Task {
 	
 	@ManyToOne
 	@JoinColumn(name="user_id", nullable=false)
-	private Users user_id;
+	private Users users_id;
+	
+	public Task(String title, String description, String priority, String status, Users users_id) {
+        this.title = title;
+        this.description = description;
+        this.priority = priority;
+        this.status = status;
+        this.users_id = users_id;
+    }
+
+    public Task() {}
 
 	public Integer getId() {
 		return id;
@@ -90,11 +100,12 @@ public class Task {
 		this.created_at = created_at;
 	}
 
-	public Users getUser_id() {
-		return user_id;
+	public Users getUsers_id() {
+		return users_id;
 	}
 
-	public void setUser_id(Users user_id) {
-		this.user_id = user_id;
+	public void setUsers_id(Users users_id) {
+		this.users_id = users_id;
 	}
+
 }
