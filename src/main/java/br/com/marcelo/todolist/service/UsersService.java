@@ -16,10 +16,10 @@ public class UsersService {
 	private UsersRepository usersRepository;
 	
 	public UsersResponse addNewUser(Users newUsers) {	    
-		Users user_register = usersRepository.findByEmail(newUsers.getEmail());
-		if (user_register != null) {
-			throw new UsersConflictException("Email " + user_register.getEmail() + " já cadastrado.");
-		}
+		usersRepository.findByEmail(newUsers.getEmail())
+			.ifPresent(user ->{
+				throw new UsersConflictException("Email " + user.getEmail() + " já cadastrado.");
+			});
 		
 		String bcryptHashString = BCrypt.withDefaults().hashToString(12, newUsers.getPassword().toCharArray());
 

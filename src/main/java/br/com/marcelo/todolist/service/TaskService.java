@@ -23,10 +23,6 @@ public class TaskService {
 	public TaskResponse addNewTask(TaskDTO taskDTO) {		
 		Users user = usersRepository.findById(taskDTO.getUser_id())
 				.orElseThrow(() -> new UsersNotFoundException("Código usuário " + taskDTO.getUser_id() + " não encontrado.")); 
-
-		if (user == null) {
-			throw new UsersNotFoundException("Código usuário " + taskDTO.getUser_id() + " não encontrado.");
-		}
 		
 		Task new_task = new Task(
 			taskDTO.getTitle(),
