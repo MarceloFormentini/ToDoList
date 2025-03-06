@@ -19,8 +19,7 @@ public class TaskDTO {
 
     @NotBlank(message="O status não pode estar vazio")
     private String status;
-
-    @NotNull(message="O código do usuário é obrigatório")
+    
     private Integer user_id;
 
 	public String getTitle() {
@@ -54,7 +53,7 @@ public class TaskDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
+	
 	public Integer getUser_id() {
 		return user_id;
 	}
@@ -62,5 +61,4 @@ public class TaskDTO {
 	public void setUser_id(Integer user_id) {
 		this.user_id = user_id;
 	}
-
 }
