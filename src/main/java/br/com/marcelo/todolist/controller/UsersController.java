@@ -1,7 +1,11 @@
 package br.com.marcelo.todolist.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +15,7 @@ import br.com.marcelo.todolist.dto.UsersResponse;
 import br.com.marcelo.todolist.exception.UsersConflictException;
 import br.com.marcelo.todolist.model.Users;
 import br.com.marcelo.todolist.service.UsersService;
+import jakarta.validation.Valid;
 
 @RestController
 public class UsersController {
@@ -19,18 +24,23 @@ public class UsersController {
 	private UsersService service;
 	
 	@PostMapping("/users")
-	public ResponseEntity<?> addNewUsers(@RequestBody Users newUsers){
+	public ResponseEntity<?> addNewUsers(@Valid @RequestBody Users newUsers, BindingResult result){
+		if (result.hasErrors()) {
+			Map<String, String> errors = new HashMap<>();
+	        result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+	        return ResponseEntity.badRequest().body(errors);
+		}
+		
 		try {
 			UsersResponse response = service.addNewUser(newUsers);
-			if (response != null) {
-				return ResponseEntity.ok(response);
-			}
+			return ResponseEntity.ok(response);
 		}
 		catch(UsersConflictException ex) {
 			return ResponseEntity.status(409).body(new ErrorMessage(ex.getMessage()));
 		}
-
-		return ResponseEntity.badRequest().build();
+		catch(Exception ex) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 }

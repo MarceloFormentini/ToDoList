@@ -33,14 +33,13 @@ public class TaskController {
 
 		try {
 			TaskResponse response = service.addNewTask(taskDTO);
-			if (response != null) {
-				return ResponseEntity.ok(response);
-			}
+			return ResponseEntity.ok(response);
 		}
 		catch(UsersNotFoundException ex) {
 			return ResponseEntity.status(400).body(new ErrorMessage(ex.getMessage()));
 		}
-
-		return ResponseEntity.badRequest().build();
+		catch(Exception ex) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 }
