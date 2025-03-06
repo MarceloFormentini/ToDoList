@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.marcelo.todolist.dto.TaskDTO;
-import br.com.marcelo.todolist.dto.TaskResponse;
+import br.com.marcelo.todolist.dto.TaskResponseDTO;
 import br.com.marcelo.todolist.exception.UsersNotFoundException;
 import br.com.marcelo.todolist.model.Task;
 import br.com.marcelo.todolist.model.Users;
@@ -20,7 +20,7 @@ public class TaskService {
 	@Autowired
 	private UsersRepository usersRepository;
 	
-	public TaskResponse addNewTask(TaskDTO taskDTO) {		
+	public Task addNewTask(TaskDTO taskDTO) {		
 		Users user = usersRepository.findById(taskDTO.getUser_id())
 				.orElseThrow(() -> new UsersNotFoundException("Código usuário " + taskDTO.getUser_id() + " não encontrado.")); 
 		
@@ -32,13 +32,6 @@ public class TaskService {
 			user
 		);
 		
-		Task saved_task = taskRepository.save(new_task);
-				
-		return new TaskResponse(
-			saved_task.getTitle(),
-			saved_task.getDescription(),
-			saved_task.getPriority(),
-			saved_task.getCreated_at()
-		);				
+		return taskRepository.save(new_task);				
 	}
 }

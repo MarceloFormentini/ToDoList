@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.marcelo.todolist.dto.ErrorMessage;
-import br.com.marcelo.todolist.dto.UsersResponse;
+import br.com.marcelo.todolist.dto.ErrorMessageDTO;
+import br.com.marcelo.todolist.dto.UsersResponseDTO;
 import br.com.marcelo.todolist.exception.UsersConflictException;
 import br.com.marcelo.todolist.model.Users;
 import br.com.marcelo.todolist.service.UsersService;
@@ -31,8 +31,14 @@ public class UsersController {
 	        return ResponseEntity.badRequest().body(errors);
 		}
 		
-		UsersResponse response = service.addNewUser(newUsers);
-		return ResponseEntity.ok(response);
+		Users userSaved = service.addNewUser(newUsers);
+		
+		return ResponseEntity.ok(
+			new UsersResponseDTO(
+				userSaved.getName(),
+				userSaved.getEmail()
+			)
+		);
 	}
 
 }

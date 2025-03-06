@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.marcelo.todolist.dto.ErrorMessage;
 import br.com.marcelo.todolist.dto.TaskDTO;
-import br.com.marcelo.todolist.dto.TaskResponse;
-import br.com.marcelo.todolist.exception.UsersNotFoundException;
+import br.com.marcelo.todolist.dto.TaskResponseDTO;
+import br.com.marcelo.todolist.model.Task;
 import br.com.marcelo.todolist.service.TaskService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -33,7 +32,15 @@ public class TaskController {
 		}
 
 		taskDTO.setUser_id((int)request.getAttribute("user_id"));
-		TaskResponse response = service.addNewTask(taskDTO);
-		return ResponseEntity.ok(response);
+		Task taskSaved = service.addNewTask(taskDTO);
+		
+		return ResponseEntity.ok(
+			new TaskResponseDTO(
+				taskSaved.getTitle(),
+				taskSaved.getDescription(),
+				taskSaved.getPriority(),
+				taskSaved.getCreated_at()
+			)
+		);
 	}
 }

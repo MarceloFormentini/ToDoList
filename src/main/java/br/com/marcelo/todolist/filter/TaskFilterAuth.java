@@ -95,6 +95,7 @@ public class TaskFilterAuth extends OncePerRequestFilter{
 			"\"error\": \"" + status.getReasonPhrase() + "\", " +
 			"\"message\": \"" + message + "\"}"
 		);
+		response.getWriter().flush();
 	}
 
 }
