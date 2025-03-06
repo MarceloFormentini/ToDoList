@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -71,10 +72,29 @@ public class TaskFilterAuth extends OncePerRequestFilter{
 	
 			filterChain.doFilter(request, response);
 		}
-		catch(UsersNotFoundException | UsersInvalidPasswordException | MissingCredentialsException ex) {
-			throw new ServletException(ex);
+		catch(UsersNotFoundException ex) {
+			handleException(response, ex.getMessage(), HttpStatus.NOT_FOUND);
+		}
+		catch(UsersInvalidPasswordException ex) {
+			handleException(response, ex.getMessage(), HttpStatus.UNAUTHORIZED);
+		}
+		catch(MissingCredentialsException ex) {
+			handleException(response, ex.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		catch(Exception ex) {
+			handleException(response, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
+	private void handleException(HttpServletResponse response, String message, HttpStatus status) throws IOException{
+		response.setContentType("application/json");
+		response.setStatus(status.value());
+		response.getWriter().write(
+			"{\"timestamp\": \"" + java.time.LocalDateTime.now() + "\", " +
+			"\"status\": " + status.value() + ", " +
+			"\"error\": \"" + status.getReasonPhrase() + "\", " +
+			"\"message\": \"" + message + "\"}"
+		);
+	}
 
 }
