@@ -32,39 +32,48 @@ public class TaskFilterAuth extends OncePerRequestFilter{
             return;
         }
 		
-		// obter dados da autenticação
-		var authorization = request.getHeader("Authorization");
+		try {
+			// obter dados da autenticação
+			var authorization = request.getHeader("Authorization");
+	
+			if (authorization == null || !authorization.startsWith("Basic ")) {
+				throw new MissingCredentialsException("Esta requisição requer autenticação.");
+			}
+	
+			//decode base64
+			var auth_encoded = authorization.substring("Basic".length()).trim();
+			
+			byte[] auth_decode = Base64.getDecoder().decode(auth_encoded);
+			
+			var auth_string = new String(auth_decode);
+			
+			String[] credentials = auth_string.split(":");
 
-		if (authorization == null || !authorization.startsWith("Basic ")) {
-			throw new MissingCredentialsException("Esta requisição requer autenticação.");
+			if (credentials.length != 2) {
+                throw new MissingCredentialsException("Formato de autenticação inválido.");
+            }
+
+			String email = credentials[0];
+			String password = credentials[1];
+			
+			// validar usuário
+			var user = usersRepository.findByEmail(email)
+			.orElseThrow(() ->{
+				throw new UsersNotFoundException("Usuário não encontrado.");
+			});
+			
+			// validar senha
+			if(!BCrypt.verifyer().verify(password.toCharArray(), user.getPassword()).verified) {
+				throw new UsersInvalidPasswordException("Senha inválida.");
+			}
+			
+			request.setAttribute("user_id", user.getId());
+	
+			filterChain.doFilter(request, response);
 		}
-
-		//decode base64
-		var auth_encoded = authorization.substring("Basic".length()).trim();
-		
-		byte[] auth_decode = Base64.getDecoder().decode(auth_encoded);
-		
-		var auth_string = new String(auth_decode);
-		
-		String[] credentials = auth_string.split(":");
-		String email = credentials[0];
-		String password = credentials[1];
-		
-		// validar usuário
-		var user = usersRepository.findByEmail(email)
-		.orElseThrow(() ->{
-			throw new UsersNotFoundException("Usuário " + email + " não cadastrado.");
-		});
-		
-		// validar senha
-		if(!BCrypt.verifyer().verify(password.toCharArray(), user.getPassword()).verified) {
-			throw new UsersInvalidPasswordException("Senha do usuário " + email + " inválida.");
+		catch(UsersNotFoundException | UsersInvalidPasswordException | MissingCredentialsException ex) {
+			throw new ServletException(ex);
 		}
-		
-		request.setAttribute("user_id", user.getId());
-
-		filterChain.doFilter(request, response);
-		
 	}
 
 

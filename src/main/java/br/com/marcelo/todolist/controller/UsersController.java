@@ -31,16 +31,8 @@ public class UsersController {
 	        return ResponseEntity.badRequest().body(errors);
 		}
 		
-		try {
-			UsersResponse response = service.addNewUser(newUsers);
-			return ResponseEntity.ok(response);
-		}
-		catch(UsersConflictException ex) {
-			return ResponseEntity.status(409).body(new ErrorMessage(ex.getMessage()));
-		}
-		catch(Exception ex) {
-			return ResponseEntity.badRequest().build();
-		}
+		UsersResponse response = service.addNewUser(newUsers);
+		return ResponseEntity.ok(response);
 	}
 
 }

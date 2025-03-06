@@ -32,16 +32,8 @@ public class TaskController {
 	        return ResponseEntity.badRequest().body(errors);
 		}
 
-		try {
-			taskDTO.setUser_id((int)request.getAttribute("user_id"));
-			TaskResponse response = service.addNewTask(taskDTO);
-			return ResponseEntity.ok(response);
-		}
-		catch(UsersNotFoundException ex) {
-			return ResponseEntity.status(400).body(new ErrorMessage(ex.getMessage()));
-		}
-		catch(Exception ex) {
-			return ResponseEntity.badRequest().build();
-		}
+		taskDTO.setUser_id((int)request.getAttribute("user_id"));
+		TaskResponse response = service.addNewTask(taskDTO);
+		return ResponseEntity.ok(response);
 	}
 }

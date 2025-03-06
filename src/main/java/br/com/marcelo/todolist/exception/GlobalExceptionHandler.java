@@ -16,7 +16,6 @@ public class GlobalExceptionHandler {
         return Map.of(
                 "timestamp", LocalDateTime.now(),
                 "status", status.value(),
-//                "error", status.getReasonPhrase(),
                 "message", message
         );
     }
